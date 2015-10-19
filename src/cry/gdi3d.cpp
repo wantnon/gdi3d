@@ -607,7 +607,7 @@ void Cgdi3dScene::loadModelMyFormat(const string&folderPath,const string&fileNam
 	fclose(fp);
 
 }
-Cvert Cgdi3dScene::interpolateInLine(const Cvert&v1,const Cvert&v2,float x,float y){
+Cvert Cgdi3dScene::interpolateInLine_inViewportSpace(const Cvert&v1,const Cvert&v2,float x,float y){
 	const float x1=v1.m_pos.x();
 	const float y1=v1.m_pos.y();
 	const float z1=v1.m_pos.z();
@@ -640,7 +640,7 @@ Cvert Cgdi3dScene::interpolateInLine(const Cvert&v1,const Cvert&v2,float x,float
 	//----calculate s,t
 	const float f=m_camera->getzFar();
 	const float n=m_camera->getzNear();
-	const float M=(f==n)?M_INF:(f+n)/(f-n);
+	const float M=(f==n)?M_INF:f/(f-n);
 	const float s2_mul_z2SubM=s2*(z2-M);
 	const float s1_mul_z1SubM=s1*(z1-M);
 	const float t2_mul_z2SubM=t2*(z2-M);
@@ -1516,7 +1516,7 @@ void Cgdi3dScene::writeZBuffer(int x,int y,double zValueToWrite){
 		m_zBuffer[y*w+x]=zValueToWrite;
 	}
 }
-CearlyZOutput Cgdi3dScene::interpolateInTri_earlyZ(const Cvert&v0,const Cvert&v1,const Cvert&v2,float x,float y){
+CearlyZOutput Cgdi3dScene::interpolateInTri_inViewportSpace_earlyZ(const Cvert&v0,const Cvert&v1,const Cvert&v2,float x,float y){
 	const float x0=v0.m_pos.x();
 	const float y0=v0.m_pos.y();
 	const float z0=v0.m_pos.z();
@@ -1553,7 +1553,7 @@ CearlyZOutput Cgdi3dScene::interpolateInTri_earlyZ(const Cvert&v0,const Cvert&v1
 	earlyZOutput.m_z=z;
 	return earlyZOutput;
 }
-Cvert Cgdi3dScene::interpolateInTri_otherAttributes(const Cvert&v0,const Cvert&v1,const Cvert&v2,const CearlyZOutput&earlyZOutput){
+Cvert Cgdi3dScene::interpolateInTri_inViewportSpace_otherAttributes(const Cvert&v0,const Cvert&v1,const Cvert&v2,const CearlyZOutput&earlyZOutput){
 	const float A=earlyZOutput.m_A;
 	const float B=earlyZOutput.m_B;
 	const float z=earlyZOutput.m_z;
@@ -1577,7 +1577,7 @@ Cvert Cgdi3dScene::interpolateInTri_otherAttributes(const Cvert&v0,const Cvert&v
 	{
 		const float f=m_camera->getzFar();
 		const float n=m_camera->getzNear();
-		const float M=(f==n)?M_INF:(f+n)/(f-n);
+		const float M=(f==n)?M_INF:f/(f-n);
 		const float s0_mul_z0SubM=s0*(z0-M);
 		const float s1_mul_z1SubM=s1*(z1-M);
 		const float s2_mul_z2SubM=s2*(z2-M);
@@ -1661,7 +1661,7 @@ void Cgdi3dScene::fillTriFace_solid(HDC hdc,const Cvert&v0,const Cvert&v1,const 
 	}else if(!triIsPanTop&&!triIsPanBottom){//not pan bottom and not pan top
 		//a horizontal line across vMid intersect with line=(vHigh,vLow) in point v
 		Cvert v=linePHighPLowIntersectWithHorizontalLineAcrossPMid(vHigh,vLow,vMid);
-		v=interpolateInLine(vHigh,vLow,v.m_pos.x(),v.m_pos.y());
+		v=interpolateInLine_inViewportSpace(vHigh,vLow,v.m_pos.x(),v.m_pos.y());
 			
 		if(v.m_pos.x()==vMid.m_pos.x()){
 			//triangle is actually a nonHorizon line
@@ -1717,11 +1717,11 @@ void Cgdi3dScene::fillPanBottomTriFace_solid(HDC hdc,const Cvert&vTop,const Cver
 
 		for(int x_int=xLeft_int;x_int<=xRight_int;x_int++){
 			const Cc3dVector2&pixelCenter=Cc3dVector2(x_int+0.5,y_int+0.5);//note: pixel(x_int,y_int)'s center is (x_int+0.5,y_int+0.5)
-			CearlyZOutput earlyZOutput=interpolateInTri_earlyZ(vTop,vBottomLeft,vBottomRight,pixelCenter.x(),pixelCenter.y());
+			CearlyZOutput earlyZOutput=interpolateInTri_inViewportSpace_earlyZ(vTop,vBottomLeft,vBottomRight,pixelCenter.x(),pixelCenter.y());
 			float z_inbuffer=readZBuffer(x_int,y_int);
 			if(earlyZOutput.m_z<z_inbuffer){
 
-				Cvert interpolatedV=interpolateInTri_otherAttributes(vTop,vBottomLeft,vBottomRight,earlyZOutput);
+				Cvert interpolatedV=interpolateInTri_inViewportSpace_otherAttributes(vTop,vBottomLeft,vBottomRight,earlyZOutput);
 				Cfrag frag=fragShaderProgram(interpolatedV,m_textureList[interpolatedV.m_textureID]);
 				drawPixel_OAtLD(hdc,x_int,y_int,frag.m_color);
 
@@ -1778,11 +1778,11 @@ void Cgdi3dScene::fillPanTopTriFace_solid(HDC hdc,const Cvert&vTopLeft,const Cve
 
 		for(int x_int=xLeft_int;x_int<=xRight_int;x_int++){
 			const Cc3dVector2&pixelCenter=Cc3dVector2(x_int+0.5,y_int+0.5);//note: pixel(x_int,y_int)'s center is (x_int+0.5,y_int+0.5)
-			CearlyZOutput earlyZOutput=interpolateInTri_earlyZ(vBottom,vTopLeft,vTopRight,pixelCenter.x(),pixelCenter.y());
+			CearlyZOutput earlyZOutput=interpolateInTri_inViewportSpace_earlyZ(vBottom,vTopLeft,vTopRight,pixelCenter.x(),pixelCenter.y());
 			float z_inbuffer=readZBuffer(x_int,y_int);
 			if(earlyZOutput.m_z<z_inbuffer){
 
-				Cvert interpolatedV=interpolateInTri_otherAttributes(vBottom,vTopLeft,vTopRight,earlyZOutput);
+				Cvert interpolatedV=interpolateInTri_inViewportSpace_otherAttributes(vBottom,vTopLeft,vTopRight,earlyZOutput);
 				Cfrag frag=fragShaderProgram(interpolatedV,m_textureList[interpolatedV.m_textureID]);
 				drawPixel_OAtLD(hdc,x_int,y_int,frag.m_color);
 
@@ -1862,7 +1862,7 @@ void Cgdi3dScene::fillLine(HDC hdc,const Cvert&v0,const Cvert&v1){
 
 	
 				const Cc3dVector2&pixelCenter=Cc3dVector2(x_int+0.5,y_int+0.5);//note: pixel(x_int,y_int)'s center is (x_int+0.5,y_int+0.5)
-				Cvert interpolatedV=interpolateInLine(vLow,vHigh,pixelCenter.x(),pixelCenter.y());
+				Cvert interpolatedV=interpolateInLine_inViewportSpace(vLow,vHigh,pixelCenter.x(),pixelCenter.y());
 				float z_inbuffer=readZBuffer(x_int,y_int);
 				if(interpolatedV.m_pos.z()<=z_inbuffer)//use <= instead of <
 				{
@@ -1904,7 +1904,7 @@ void Cgdi3dScene::fillLine(HDC hdc,const Cvert&v0,const Cvert&v1){
 				y_int=floor(y+0.5);
 			}
 			const Cc3dVector2&pixelCenter=Cc3dVector2(x_int+0.5,y_int+0.5);//note: pixel(x_int,y_int)'s center is (x_int+0.5,y_int+0.5)
-			Cvert interpolatedV=interpolateInLine(vLeft,vRight,pixelCenter.x(),pixelCenter.y());
+			Cvert interpolatedV=interpolateInLine_inViewportSpace(vLeft,vRight,pixelCenter.x(),pixelCenter.y());
 			float z_inbuffer=readZBuffer(x_int,y_int);
 			if(interpolatedV.m_pos.z()<=z_inbuffer)//use <= instead of <
 			{
@@ -1954,7 +1954,7 @@ void Cgdi3dScene::fillPanBottomTriFace_depthOnly(HDC hdc,const Cvert&vTop,const 
 
 		for(int x_int=xLeft_int;x_int<=xRight_int;x_int++){
 			const Cc3dVector2&pixelCenter=Cc3dVector2(x_int+0.5,y_int+0.5);//note: pixel(x_int,y_int)'s center is (x_int+0.5,y_int+0.5)
-			CearlyZOutput earlyZOutput=interpolateInTri_earlyZ(vTop,vBottomLeft,vBottomRight,pixelCenter.x(),pixelCenter.y());
+			CearlyZOutput earlyZOutput=interpolateInTri_inViewportSpace_earlyZ(vTop,vBottomLeft,vBottomRight,pixelCenter.x(),pixelCenter.y());
 			float z_inbuffer=readZBuffer(x_int,y_int);
 			if(earlyZOutput.m_z+polygonOffset<z_inbuffer){
 				writeZBuffer(x_int,y_int,earlyZOutput.m_z+polygonOffset);
@@ -2010,7 +2010,7 @@ void Cgdi3dScene::fillPanTopTriFace_depthOnly(HDC hdc,const Cvert&vTopLeft,const
 
 		for(int x_int=xLeft_int;x_int<=xRight_int;x_int++){
 			const Cc3dVector2&pixelCenter=Cc3dVector2(x_int+0.5,y_int+0.5);//note: pixel(x_int,y_int)'s center is (x_int+0.5,y_int+0.5)
-			CearlyZOutput earlyZOutput=interpolateInTri_earlyZ(vBottom,vTopLeft,vTopRight,pixelCenter.x(),pixelCenter.y());
+			CearlyZOutput earlyZOutput=interpolateInTri_inViewportSpace_earlyZ(vBottom,vTopLeft,vTopRight,pixelCenter.x(),pixelCenter.y());
 			float z_inbuffer=readZBuffer(x_int,y_int);
 			if(earlyZOutput.m_z+polygonOffset<z_inbuffer){
 		
@@ -2082,7 +2082,7 @@ void Cgdi3dScene::fillTriFace_depthOnly(HDC hdc,const Cvert&v0,const Cvert&v1,co
 	}else if(!triIsPanTop&&!triIsPanBottom){//not pan bottom and not pan top
 		//a horizontal line across vMid intersect with line=(vHigh,vLow) in point v
 		Cvert v=linePHighPLowIntersectWithHorizontalLineAcrossPMid(vHigh,vLow,vMid);
-		v=interpolateInLine(vHigh,vLow,v.m_pos.x(),v.m_pos.y());
+		v=interpolateInLine_inViewportSpace(vHigh,vLow,v.m_pos.x(),v.m_pos.y());
 			
 		if(v.m_pos.x()==vMid.m_pos.x()){
 			//triangle is actually a nonHorizon line

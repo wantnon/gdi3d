@@ -140,10 +140,10 @@ public://rasterization low level functions
 	//cull face
 	bool thisViewportSpaceTriIsFacingUs(const Cc3dVector4&p0,const Cc3dVector4&p1,const Cc3dVector4&p2);
 	//interpolate
-	Cvert interpolateInLine(const Cvert&v1,const Cvert&v2,float x,float y);
+	Cvert interpolateInLine_inViewportSpace(const Cvert&v1,const Cvert&v2,float x,float y);
 	Cvert interpolateInLine_inClippingSpace(const Cvert&v1,const Cvert&v2,float x,float y);
-	CearlyZOutput interpolateInTri_earlyZ(const Cvert&v0,const Cvert&v1,const Cvert&v2,float x,float y);
-	Cvert interpolateInTri_otherAttributes(const Cvert&v0,const Cvert&v1,const Cvert&v2,const CearlyZOutput&earlyZOutput);
+	CearlyZOutput interpolateInTri_inViewportSpace_earlyZ(const Cvert&v0,const Cvert&v1,const Cvert&v2,float x,float y);
+	Cvert interpolateInTri_inViewportSpace_otherAttributes(const Cvert&v0,const Cvert&v1,const Cvert&v2,const CearlyZOutput&earlyZOutput);
 	//zbuffer
 	void clearZBuffer();
 	double readZBuffer(int x,int y);
