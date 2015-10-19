@@ -5,6 +5,7 @@
 #include "c3dMaterial.h"
 #include "texture.h"
 #include "funcs.h"
+//opengl transform pipeline,ref: http://user.qzone.qq.com/350479720/blog/1310060277
 enum eSamepleScene{
 	
 	eSampleScene_cube=0,
