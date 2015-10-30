@@ -1474,7 +1474,7 @@ void Cgdi3dScene::drawPixel_OAtLD(HDC hdc,float x,float y,const Cc3dVector4&colo
 	int b_clamp=max(0,min(1,color.b()))*255;
 	SetPixel(hdc, x, m_viewport.w()-y, RGB(r_clamp,g_clamp,b_clamp));
 }
-void Cgdi3dScene::drawLine_OAtLD(HDC hdc,float x1,float y1,float x2,float y2){
+void Cgdi3dScene::drawLine_OAtLD(HDC hdc,int x1,int y1,int x2,int y2){
 	MoveToEx(hdc,x1,m_viewport.w()-y1,0);
 	LineTo(hdc,x2,m_viewport.w()-y2);
 }

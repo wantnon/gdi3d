@@ -161,7 +161,7 @@ public://rasterization low level functions
 	void fillPanBottomTriFace_depthOnly(HDC hdc,const Cvert&vTop,const Cvert&vBottomLeft,const Cvert&vBottomRight,double polygonOffset);
 	void fillPanTopTriFace_depthOnly(HDC hdc,const Cvert&vTopLeft,const Cvert&vBottom,const Cvert&vTopRight,double polygonOffset);
 public://functions only for debug
-	void drawLine_OAtLD(HDC hdc,float x1,float y1,float x2,float y2);//suppose origin is at left down corner
+	void drawLine_OAtLD(HDC hdc,int x1,int y1,int x2,int y2);//suppose origin is at left down corner
 	void drawTriWire(HDC hdc,const Cc3dVector4&p0,const Cc3dVector4&p1,const Cc3dVector4&p2);
 public://lightSource
 	Cc3dLightSource*m_lightSource;
