@@ -8,3 +8,7 @@ a soft rasterization render implemented using windows GDI
 ![screenshot](https://raw.githubusercontent.com/wantnon2/gdi3d/master/screenshots/screenshot_4.png)  
 ![screenshot](https://raw.githubusercontent.com/wantnon2/gdi3d/master/screenshots/screenshot_5.png)  
 ![screenshot](https://raw.githubusercontent.com/wantnon2/gdi3d/master/screenshots/screenshot_6.png)  
+  
+----  
+blog: http://www.cnblogs.com/wantnon/p/4894980.html  
+
