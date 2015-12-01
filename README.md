@@ -11,7 +11,7 @@ a soft rasterization render implemented using windows GDI
   
 ----  
 blog: http://www.cnblogs.com/wantnon/p/4894980.html  
-qq group: 338565878   
+qq group: 519196868    
 email: 350479720@qq.com   
 
 
